@@ -1,12 +1,18 @@
 (ns plumbing.core
   "Utility belt for Clojure in the wild"
   (:require
-   [schema.macros :as sm]
+   #+clj [schema.macros :as sm]
+   #+cljs [goog.string :as gstring]
+   #+cljs [goog.string.format]
    [plumbing.fnk.schema :as schema]
    [plumbing.fnk.pfnk :as pfnk]
-   [plumbing.fnk.impl :as fnk-impl]))
+   #+clj [plumbing.fnk.impl :as fnk-impl])
 
-(set! *warn-on-reflection* true)
+  #+cljs
+  (:require-macros
+   [schema.macros :as sm]))
+
+#+clj (set! *warn-on-reflection* true)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Maps
@@ -93,6 +99,10 @@
     (into [] (map keywordize-map x))
     x))
 
+#+cljs
+(defn format [s & args]
+  (apply gstring/format s args))
+
 (defmacro lazy-get
   "Like get but lazy about default"
   [m k d]
@@ -103,7 +113,11 @@
 (defn safe-get
   "Like get but throw an exception if not found"
   [m k]
-  (lazy-get m k (throw (IllegalArgumentException. (format "Key %s not found in %s" k (mapv key m))))))
+  (lazy-get
+   m k
+   (let [e (format "Key %s not found in %s" k (mapv key m))]
+     (throw #+clj (IllegalArgumentException. e)
+            #+cljs (js/Error e)))))
 
 (defn safe-get-in
   "Like get-in but throws exception if not found"
@@ -188,6 +202,7 @@
   [f s]
   (keep-indexed (fn [i x] (when (f x) i)) s))
 
+#+clj ;; TODO: Make cljs compatible
 (defn frequencies-fast
   "Like clojure.core/frequencies, but faster.
    Uses Java's equal/hash, so may produce incorrect results if
@@ -198,6 +213,7 @@
       (.put res x (unchecked-inc (int (or (.get res x) 0)))))
     (into {} res)))
 
+#+clj ;; TODO: Make cljs compatible
 (defn distinct-fast
   "Like clojure.core/distinct, but faster.
    Uses Java's equal/hash, so may produce incorrect results if
@@ -206,6 +222,7 @@
   (let [s (java.util.HashSet.)]
     (filter #(when-not (.contains s %) (.add s %) true) xs)))
 
+#+clj ;; TODO: Make cljs compatible
 (defn distinct-by
   "Returns elements of xs which return unique
    values according to f. If multiple elements of xs return the same
@@ -218,6 +235,7 @@
       (do (.add s id)
           x))))
 
+#+clj ;; TODO: Make cljs compatible
 (defn distinct-id
   "Like distinct but uses reference rather than value identity, very clojurey"
   [xs]
@@ -410,4 +428,4 @@
       `(def ~(with-meta name (merge (meta name) (assoc-when (or attr-map? {}) :doc docstring?)))
          ~f))))
 
-(set! *warn-on-reflection* false)
+#+clj (set! *warn-on-reflection* false)

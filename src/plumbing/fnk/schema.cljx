@@ -12,7 +12,11 @@
    schemas on inputs as appropriate.  Output schemas may not have optional keys."
   (:require
    [schema.core :as s]
-   [schema.macros :as macros]))
+   #+clj [schema.macros :as sm])
+
+  #+cljs
+  (:require-macros
+   [schema.macros :as sm]))
 
 (def Schema (s/protocol s/Schema))
 (def InputSchema {(s/either (s/eq s/Keyword) schema.core.OptionalKey s/Keyword) Schema})

@@ -6,12 +6,17 @@
    are one possible example)."
   (:require
    [schema.core :as s]
-   [schema.macros :as sm]
+   #+clj [schema.macros :as sm]
    [plumbing.fnk.schema :as schema])
+
+  #+cljs
+  (:require-macros
+   [schema.macros :as sm])
+
   (:import
    [schema.core FnSchema One]))
 
-(set! *warn-on-reflection* true)
+#+clj (set! *warn-on-reflection* true)
 
 (defprotocol PFnk
   "Protocol for keyword functions and their specifications, e.g., fnks and graphs."
@@ -49,4 +54,4 @@
   [f [input-schema output-schema :as io]]
   (s/schematize-fn f (sm/=> output-schema input-schema)))
 
-(set! *warn-on-reflection* false)
+#+clj (set! *warn-on-reflection* false)

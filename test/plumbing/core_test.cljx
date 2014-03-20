@@ -1,8 +1,8 @@
 (ns plumbing.core-test
-  (:use clojure.test plumbing.core)
+  #+clj (:use clojure.test plumbing.core)
   (:require
    [schema.core :as s]
-   [schema.macros :as sm]
+   #+clj [schema.macros :as sm]
    [schema.test :as schema-test]
    [plumbing.fnk.pfnk :as pfnk]
    [plumbing.fnk.impl :as fnk-impl]))
