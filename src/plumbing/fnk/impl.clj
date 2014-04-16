@@ -21,7 +21,7 @@
    the fnk without incurring the overhead of producing and then
    destructuring a top-level map.  See plumbing.graph.positional for
    an example use."
-  (require
+  (:require
    [clojure.set :as set]
    [schema.core :as s]
    [schema.macros :as schema-macros]

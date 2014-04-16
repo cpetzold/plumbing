@@ -11,10 +11,7 @@
 
   #+cljs
   (:require-macros
-   [schema.macros :as sm])
-
-  (:import
-   [schema.core FnSchema One]))
+   [schema.macros :as sm]))
 
 #+clj (set! *warn-on-reflection* true)
 
@@ -23,16 +20,16 @@
   (io-schemata [this]
     "Return a pair of [input-schema output-schema], as specified in plumbing.fnk.schema."))
 
-(defn input [^FnSchema s]
+(defn input [^schema.core.FnSchema s]
   (let [[[is :as args] :as schemas] (.input-schemas s)]
     (schema/assert-iae (= 1 (count schemas)) "Fnks have a single arity, not %s" (count schemas))
     (schema/assert-iae (= 1 (count args)) "Fnks take a single argument, not %s" (count args))
-    (schema/assert-iae (instance? One is) "Fnks take a single argument, not variadic")
-    (let [s (.schema ^One is)]
+    (schema/assert-iae (instance? schema.core.One is) "Fnks take a single argument, not variadic")
+    (let [s (.schema ^schema.core.One is)]
       (schema/assert-iae (map? s) "Fnks take a map argument, not %s" (class s))
       s)))
 
-(defn output [^FnSchema s]
+(defn output [^schema.core.FnSchema s]
   (.output-schema s))
 
 (extend-type clojure.lang.Fn

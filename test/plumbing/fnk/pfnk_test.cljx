@@ -1,13 +1,19 @@
 (ns plumbing.fnk.pfnk-test
-  (:use clojure.test plumbing.core plumbing.fnk.pfnk)
-  (:require [schema.core :as s]))
+  #+clj (:use clojure.test)
+  #+cljs
+  (:require-macros
+   [cemerick.cljs.test :refer [is deftest testing]])
+  (:require
+   [schema.core :as s]
+   [plumbing.core :as p #+cljs :include-macros #+cljs true]
+   [plumbing.fnk.pfnk :as pfnk]))
 
 (deftest meta-round-trip-test
   (let [i-schema {:x s/Any}
         o-schema {:y s/Any}
         schemata [i-schema o-schema]
-        f (fn->fnk (fn [m] {:y (inc (safe-get m :x))}) schemata)]
+        f (pfnk/fn->fnk (fn [m] {:y (inc (p/safe-get m :x))}) schemata)]
     (is (= {:y 2} (f {:x 1})))
-    (is (= schemata (io-schemata f)))
-    (is (= i-schema (input-schema f)))
-    (is (= o-schema (output-schema f)))))
+    (is (= schemata (pfnk/io-schemata f)))
+    (is (= i-schema (pfnk/input-schema f)))
+    (is (= o-schema (pfnk/output-schema f)))))

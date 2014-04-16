@@ -10,7 +10,8 @@
 
   #+cljs
   (:require-macros
-   [schema.macros :as sm]))
+   [schema.macros :as sm]
+   [plumbing.core :refer [for-map lazy-get]]))
 
 #+clj (set! *warn-on-reflection* true)
 

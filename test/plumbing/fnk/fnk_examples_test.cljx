@@ -1,9 +1,14 @@
 (ns plumbing.fnk.fnk-examples-test
   "Explaining input and output schemata, fnk syntax, and their relationships
    by example."
-  (:use clojure.test plumbing.core)
+  #+clj
+  (:use clojure.test)
+  #+cljs
+  (:require-macros
+   [cemerick.cljs.test :refer [is deftest testing]])
   (:require
    [schema.core :as s]
+   [plumbing.core :as p #+cljs :include-macros #+cljs true]
    [plumbing.fnk.schema :as schema]
    [plumbing.fnk.pfnk :as pfnk]))
 
@@ -101,7 +106,7 @@
 ;; schemata.  For more details and rationale for this syntax, see
 ;; plumbing.fnk/readme.md.
 
-(defnk a-simple-fnk
+(p/defnk a-simple-fnk
   "This fnk has required keys :a and :b, and an optional key :o
    that defaults to 10 -- equivalent to a-manual-keyword-function."
   [a b {o 10}]
@@ -116,7 +121,7 @@
     (test-simple-keyword-function a-simple-fnk)))
 
 
-(defnk a-simple-fnk2
+(p/defnk a-simple-fnk2
   "This fnk is like a-simple-fnk, but does not have a literal
    map body so nothing can be automatically inferred about its
    output schema"
@@ -130,7 +135,7 @@
 ;; For these cases, we can provide explicit metadata to hint the
 ;; output schema of the fnk.
 
-(defnk a-simple-fnk3 :- {:x s/Any}
+(p/defnk a-simple-fnk3 :- {:x s/Any}
   "This fnk is like a-simple-fnk2, but uses an explicit output
    schema hint, and is equivalent to a-simple-fnk"
   [a b {o 10}]
@@ -143,7 +148,7 @@
 ;; You can also provide schema information on the inputs, with
 ;; validation like schema.core/defn.  See (doc fnk) for details.
 
-(defnk a-schematized-fnk :- (s/pred odd?)
+(p/defnk a-schematized-fnk :- (s/pred odd?)
   [a :- long b :- int]
   (+ a b))
 
@@ -163,7 +168,7 @@
 ;; A nested map binding is introduced by an inner vector, whose
 ;; first element is a keyword specifying the key to bind under.
 
-(defnk a-nested-fnk
+(p/defnk a-nested-fnk
   [a [:b b1 {b2 5}] c]
   {:sum (+ a b1 b2 c)
    :products {:as a
@@ -194,7 +199,7 @@
 ;; built-in destructuring.  :as binds a symbol to the entire map
 ;; input, and & binds to a map of any extra keys not destructured.
 
-(defnk a-fancier-nested-fnk
+(p/defnk a-fancier-nested-fnk
   [a [:b b1 :as b] :as m & more]
   [a b1 b m more])
 
