@@ -30,6 +30,7 @@
 
 ;;; Helper
 
+
 (defmacro assert-iae
   "Like assert, but throws an IllegalArgumentException not an Error (and also takes args to format)"
   [form & format-args]
@@ -55,6 +56,7 @@
   (instance? clojure.lang.APersistentMap m))
 
 ;;; Input schemata
+
 
 (sm/defn explicit-schema-key-map
   "Given a possibly-unevaluated map schema, return a map from bare keyword to true
@@ -118,6 +120,7 @@
 
 ;;; Output schemata
 
+
 (defn guess-expr-output-schema
   "Guess an output schema for an expr.  Currently just looks for literal map structure and
    all keyword keys."
@@ -127,6 +130,7 @@
     `s/Any))
 
 ;;; Combining inputs and outputs.
+
 
 (sm/defn schema-diff ;; don't validate since it returns better errors.
   "Subtract output-schema from input-schema, returning nil if it's possible that an object
@@ -160,8 +164,6 @@
   (let [fails (schema-diff input-schema output-schema)]
     (when fails (throw (ex-info (str fails) {:error    :does-not-satisfy-schema
                                              :failures fails})))))
-
-
 (sm/defn ^:always-validate compose-schemata
   "Given pairs of input and output schemata for fnks f1 and f2,
    return a pair of input and output schemata for #(f2 (merge % (f1 %))).

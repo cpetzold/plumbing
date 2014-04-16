@@ -49,7 +49,8 @@
                                       "this.literal_js_was_evaluated=true"
                                       "target/unit-test.js"]}
               :builds
-              {:dev {:source-paths ["target/generated/src/clj"
+              {:dev {:source-paths ["src"
+                                    "target/generated/src/clj"
                                     "target/generated/src/cljs"]
                      :compiler {:output-to "target/main.js"
                                 :optimizations :whitespace

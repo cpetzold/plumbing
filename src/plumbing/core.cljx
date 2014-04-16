@@ -4,8 +4,8 @@
    #+clj [schema.macros :as sm]
    #+cljs [goog.string :as gstring]
    #+cljs [goog.string.format]
-   [plumbing.fnk.schema :as schema]
-   [plumbing.fnk.pfnk :as pfnk]
+   #+clj [plumbing.fnk.schema :as schema]
+   #+clj [plumbing.fnk.pfnk :as pfnk]
    #+clj [plumbing.fnk.impl :as fnk-impl])
 
   #+cljs
@@ -358,6 +358,7 @@
   [a new-val]
   (first (swap-pair! a (constantly new-val))))
 
+#+clj
 (defn millis ^long []
   (System/currentTimeMillis))
 
