@@ -7,10 +7,11 @@
   (:require
    [schema.core :as s]
    [schema.test :as schema-test]
-   [plumbing.core :as p #cljs :include-macros #+cljs true]
+   [plumbing.core :as p #+cljs :include-macros #+cljs true]
    [plumbing.fnk.pfnk :as pfnk]
    #+clj [plumbing.fnk.impl :as fnk-impl]))
 
+#+cljs (def Exception js/Error)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Maps
@@ -105,7 +106,7 @@
 
 (deftest safe-get-test
   (is (= 2 (p/safe-get {:a 2} :a)))
-  (is (thrown? Exception (p/safe-get {:a 2} :b)))
+  (is (thrown? Exception (p/safe-get {:a 2} :b)))+
   (is (= 2 (p/safe-get-in {:a {:b 2}} [:a :b])))
   (is (thrown? Exception (p/safe-get-in {:a {:b 2}} [:b])))
   (is (thrown? Exception (p/safe-get-in {:a {:b 2}} [:a :c])))
@@ -272,8 +273,8 @@
          (-> {1 1}
              (assoc 3 4)
              (update-in [1] inc)
-             (->> (map-vals dec)
-                  (map-keys inc)
+             (->> (p/map-vals dec)
+                  (p/map-keys inc)
                   (p/<- (update-in [2] inc)
                         (map [2 4])))))))
 
@@ -339,22 +340,23 @@
     (is (= [8 8 8 5 10] (p/letk [[c [:nest {a c} {b a} {d e}] e] {:c 8 :e 10 :nest {}}] [a b c d e])))))
 
 (deftest letk-dont-require-map-for-nested-only-as
-  (is (= 1 (s/letk [[[:a :as a]] {:a 1}] a))))
+  (is (= 1 (p/letk [[[:a :as a]] {:a 1}] a))))
 
 (deftest letk-no-multiple-binding-test
-  (is (thrown? Exception (eval '(s/letk [[a a] {:a 1}] a))))
-  (is (= 1 (s/letk [[a] {:a 1} [a] {:a a}] a))))
+  (is (thrown? Exception (eval '(p/letk [[a a] {:a 1}] a))))
+  (is (= 1 (p/letk [[a] {:a 1} [a] {:a a}] a))))
 
 (deftest letk-multi-shadow-test
   (let [a 1 b 2 c 3 e 4 e 5
         inp {:c 8 :e 10}]
-    (is (= [8 8 8 5 10] (s/letk [[c] inp
+    (is (= [8 8 8 5 10] (p/letk [[c] inp
                                  [{a c}] inp
                                  [{b a}] inp
                                  [{d e}] inp
                                  [e] inp]
                           [a b c d e])))))
 
+#+clj ;; TODO: Make cljs compatible
 (deftest fnk-test
   (let [call-count (atom 0)
         om {:a 1 :c 3 :d 4 :e 17 :g 22}]
@@ -473,22 +475,22 @@
 (deftest type-hints-test
   (is (= Byte (:tag (meta #'a-typehinted-defnk))))
   (doseq [f [a-typehinted-defnk
-             (fnk [^Long l] (.byteValue l))
-             (fnk [{^Long l 1}] (.byteValue l))
-             (fnk [^Long l & m] (.byteValue l))]]
+             (p/fnk [^Long l] (.byteValue l))
+             (p/fnk [{^Long l 1}] (.byteValue l))
+             (p/fnk [^Long l & m] (.byteValue l))]]
     (is (= (Byte. (byte 1)) (f {:l (Long. 1)})))
     (is (thrown? Exception (f {:l (Integer. 1)})))))
 
 #+clj ;; TODO: Make cljs compatible
 (deftest ^:slow repeated-bindings-test
-  (is (thrown? Exception (eval '(fnk [x [:x y]] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [{x {:y 1}} [:x y]] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [x :as x] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [x & x] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [{x {:y 1}} x] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [x [:x y] :as m] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [{x {:y 1}} [:x y] :as m] (+ x y)))))
-  (is (thrown? Exception (eval '(fnk [{x {:y 1}} x :as m] (+ x y))))))
+  (is (thrown? Exception (eval '(p/fnk [x [:x y]] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [{x {:y 1}} [:x y]] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [x :as x] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [x & x] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [{x {:y 1}} x] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [x [:x y] :as m] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [{x {:y 1}} [:x y] :as m] (+ x y)))))
+  (is (thrown? Exception (eval '(p/fnk [{x {:y 1}} x :as m] (+ x y))))))
 
 (deftest optional-self-shadow-test
   (is (= 1 (let [b 1] ((p/fnk [{a b}] a) {}))))

@@ -55,9 +55,10 @@
                      :compiler {:output-to "target/main.js"
                                 :optimizations :whitespace
                                 :pretty-print true}}
-               :test {:source-paths ["target/generated/src/clj"
+               :test {:source-paths ["src"
+                                     "target/generated/src/clj"
                                      "target/generated/src/cljs"
-                                     "target/generated/test/cljs"
+                                     "target/generated/test/clj"
                                      "target/generated/test/cljs"]
                       :compiler {:output-to "target/unit-test.js"
                                  :optimizations :whitespace

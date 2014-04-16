@@ -48,6 +48,7 @@
   (is (= #{:a :b}
          (set (fnk-s/required-toplevel-keys {:a {:a1 s/Str} :b Long (s/optional-key :c) Object})))))
 
+#+clj ;; TODO: Make cljs compatible
 (deftest guess-expr-output-schema-test
   (is (= `s/Any (@#'fnk-s/guess-expr-output-schema "foo")))
   (is (= {:a `s/Any :b `s/Any} (@#'fnk-s/guess-expr-output-schema {:a (+ 1 1) :b false})))
@@ -118,6 +119,7 @@
   (is (thrown? Throwable (eval `(p/fnk [[:x ~'x] ~'x] [~'x]))))
   (is (thrown? Throwable (eval `(p/fnk [{~'x 1} ~'x] [~'x])))))
 
+#+clj ;; TODO: Make cljs compatible
 (deftest fnk-out-schemata-test
   ;; Are somehow breaks the metadata on fnk forms.
   (is (= s/Any (pfnk/output-schema (p/fnk []))))

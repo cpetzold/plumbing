@@ -28,15 +28,24 @@
 (def MapOutputSchema {s/Keyword Schema})
 (def GraphIOSchemata [(s/one GraphInputSchema 'input) (s/one MapOutputSchema 'output)])
 
-;;; Helper
+;;; Helpers
 
+(defn safe-get
+  "Like (get m k), but throws if k is not present in m."
+  [m k key-path]
+  (when-not (map? m)
+    (throw (RuntimeException. (format "Expected a map at key-path %s, got type %s" key-path (class m)))))
+  (let [[_ v :as p] (find m k)]
+    (when-not p (throw (ex-info (format "Key %s not found in %s" k (keys m)) {:error :missing-key
+                                                                              :key   k
+                                                                              :map   m})))
+    v))
 
 (defmacro assert-iae
   "Like assert, but throws an IllegalArgumentException not an Error (and also takes args to format)"
   [form & format-args]
   `(when-not ~form (throw (#+clj IllegalArgumentException. #+cljs js/Error
                                  (format ~@format-args)))))
-
 
 ;;; Punt on non-maps.
 
@@ -127,7 +136,7 @@
   [expr]
   (if (and (map? expr) (every? keyword? (keys expr)))
     (into {} (for [[k v] expr] [k (guess-expr-output-schema v)]))
-    `s/Any))
+    'schema.core/Any))
 
 ;;; Combining inputs and outputs.
 

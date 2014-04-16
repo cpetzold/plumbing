@@ -35,17 +35,6 @@
 
 ;;; Helpers
 
-(defn safe-get
-  "Like (get m k), but throws if k is not present in m."
-  [m k key-path]
-  (when-not (map? m)
-    (throw (RuntimeException. (format "Expected a map at key-path %s, got type %s" key-path (class m)))))
-  (let [[_ v :as p] (find m k)]
-    (when-not p (throw (ex-info (format "Key %s not found in %s" k (keys m)) {:error :missing-key
-                                                                              :key   k
-                                                                              :map   m})))
-    v))
-
 (defn assert-distinct
   "Like (assert (distinct things)) but with a more helpful error message."
   [things]
@@ -99,7 +88,7 @@
   [env map-sym binding key-path body-form]
   (cond (symbol? binding)
         {:schema-entry [(keyword binding) (schema-macros/extract-schema-form binding)]
-         :body-form `(let [~binding (safe-get ~map-sym ~(keyword binding) ~key-path)]
+         :body-form `(let [~binding (schema/safe-get ~map-sym ~(keyword binding) ~key-path)]
                        ~body-form)}
 
         (map? binding)
@@ -127,7 +116,7 @@
            (keyword? bound-key)
            "First element to nested binding not a keyword: %s" bound-key)
           {:schema-entry [bound-key inner-input-schema inner-external-input-schema]
-           :body-form `(let [~inner-map-sym (safe-get ~map-sym ~bound-key ~key-path)]
+           :body-form `(let [~inner-map-sym (schema/safe-get ~map-sym ~bound-key ~key-path)]
                          ~inner-body-form)})
 
         :else (throw (IllegalArgumentException. (format "bad binding: %s" binding)))))
@@ -350,7 +339,7 @@
   ([fn-name input-schema external-input-schema arg-sym-map body]
      (let [[req-ks opt-ks] (-> input-schema schema/explicit-schema-key-map schema/split-schema-keys)
            explicit-schema-keys (vec (keys (schema/explicit-schema-key-map input-schema)))
-           pos-args (mapv #(safe-get arg-sym-map % []) explicit-schema-keys)]
+           pos-args (mapv #(schema/safe-get arg-sym-map % []) explicit-schema-keys)]
        `(let [pos-fn# (fn ~(symbol (str fn-name "-positional"))
                         ~pos-args
                         ~@body)]
